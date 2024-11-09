@@ -1,0 +1,342 @@
+<html>
+ <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+   body {
+            background: url('https://i.imgur.com/QFtEmVr.png') no-repeat center center fixed;
+            background-size: cover;
+            background-color: rgba(0, 0, 0, 0.9);
+            font-family: 'Arial', sans-serif;
+            max-width: 480px;
+            margin: auto;
+            overflow: hidden;
+            height: 100vh;
+        }
+   .glow {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+   .coin {
+            transition: transform 0.2s ease-in-out;
+        }
+   .coin:active {
+            transform: scale(0.95);
+        }
+   .card {
+            background: rgba(31, 41, 55, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+   .profile-img {
+            border: 2px solid #4B5563;
+            cursor: pointer;
+        }
+   .balance {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FBBF24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+   .rank {
+            color: #9CA3AF;
+        }
+   .status {
+            color: #D97706;
+        }
+   .progress-bar {
+            background: #4B5563;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+   .progress {
+            background: #FBBF24;
+            height: 100%;
+            width: 100%;
+            transition: width 0.2s ease-in-out;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+        }
+   .icon {
+            color: #FBBF24;
+            transition: transform 0.2s ease-in-out;
+        }
+   .icon:active {
+            transform: scale(0.95);
+        }
+   .icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+   .icon-label {
+            color: #9CA3AF;
+        }
+   .modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: rgba(31, 41, 55, 0.95);
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            transition: bottom 0.3s ease-in-out;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+   .modal.active {
+            bottom: 0;
+        }
+   .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+   .edit-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(31, 41, 55, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+   .edit-modal.active {
+            display: flex;
+        }
+   .edit-modal input {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            margin-bottom: 10px;
+        }
+   .edit-modal button {
+            background: #FBBF24;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            color: black;
+            cursor: pointer;
+        }
+   @media (max-width: 768px) {
+            .card {
+                width: 90%;
+                height: auto;
+            }
+            .balance {
+                font-size: 2rem;
+            }
+            .coin {
+                width: 48px;
+                height: 48px;
+            }
+        }
+  </style>
+  <script>
+   function incrementBalance() {
+            const balanceElement = document.getElementById('balance-number');
+            let currentBalance = parseInt(balanceElement.innerText);
+            balanceElement.innerText = currentBalance + 1;
+            localStorage.setItem('balance', currentBalance + 1);
+
+            const progressElement = document.getElementById('progress-value');
+            let currentProgress = parseInt(progressElement.innerText);
+            if (currentProgress > 0) {
+                progressElement.innerText = currentProgress - 1;
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.style.width = (currentProgress - 1) / 6000 * 100 + '%';
+                localStorage.setItem('progress', currentProgress - 1);
+            }
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.toggle('active');
+        }
+
+        function loadValues() {
+            const savedBalance = localStorage.getItem('balance');
+            const savedProgress = localStorage.getItem('progress');
+            const savedProfileName = localStorage.getItem('profileName');
+            const savedProfileImg = localStorage.getItem('profileImg');
+
+            if (savedBalance !== null) {
+                document.getElementById('balance-number').innerText = savedBalance;
+            }
+
+            if (savedProgress !== null) {
+                document.getElementById('progress-value').innerText = savedProgress;
+                document.getElementById('progress-bar').style.width = savedProgress / 6000 * 100 + '%';
+            }
+
+            if (savedProfileName !== null) {
+                document.getElementById('profile-name').innerText = savedProfileName;
+            }
+
+            if (savedProfileImg !== null) {
+                document.getElementById('profile-img').src = savedProfileImg;
+            }
+        }
+
+        function animateProgress() {
+            const progressElement = document.getElementById('progress-value');
+            let currentProgress = parseInt(progressElement.innerText);
+            if (currentProgress === 0) {
+                let targetProgress = 6000;
+                let interval = setInterval(() => {
+                    if (currentProgress < targetProgress) {
+                        currentProgress += 1;
+                        progressElement.innerText = currentProgress;
+                        const progressBar = document.getElementById('progress-bar');
+                        progressBar.style.width = currentProgress / 6000 * 100 + '%';
+                        localStorage.setItem('progress', currentProgress);
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 10);
+            }
+        }
+
+        function loadTelegramProfile() {
+            if (window.Telegram.WebApp) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user) {
+                    document.getElementById('profile-img').src = user.photo_url || 'https://digital.spmi.ru/article/images/blank.png';
+                    document.getElementById('profile-name').innerText = user.username || 'user';
+                }
+            }
+        }
+
+        function editProfileName() {
+            const editModal = document.getElementById('edit-modal');
+            editModal.classList.add('active');
+        }
+
+        function saveProfileName() {
+            const newName = document.getElementById('new-profile-name').value;
+            if (newName !== null && newName !== '') {
+                document.getElementById('profile-name').innerText = newName;
+                localStorage.setItem('profileName', newName);
+            }
+            const editModal = document.getElementById('edit-modal');
+            editModal.classList.remove('active');
+        }
+
+        function editProfileImg() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.onchange = (event) => {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const newImgUrl = e.target.result;
+                    document.getElementById('profile-img').src = newImgUrl;
+                    localStorage.setItem('profileImg', newImgUrl);
+                };
+                reader.readAsDataURL(file);
+            };
+            fileInput.click();
+        }
+
+        window.onload = () => {
+            loadValues();
+            animateProgress();
+            loadTelegramProfile();
+        };
+  </script>
+ </head>
+ <body class="flex items-center justify-center min-h-screen">
+  <div class="w-80 card text-white glow">
+   <div>
+    <div class="flex items-center justify-between mb-4">
+     <div class="flex items-center">
+      <img id="profile-img" alt="Profile picture" class="rounded-full w-10 h-10 mr-2 profile-img" height="40" src="https://digital.spmi.ru/article/images/blank.png" width="40" onclick="editProfileImg()"/>
+      <div>
+       <div id="profile-name" class="text-sm font-bold" onclick="editProfileName()">
+        user
+       </div>
+      </div>
+     </div>
+     <div class="flex items-center">
+      <i class="fas fa-gem text-blue-400 mr-1">
+      </i>
+      <div class="text-sm">
+       Diamond
+      </div>
+     </div>
+    </div>
+    <div class="text-center mb-4">
+     <div class="balance">
+      <i class="fas fa-coins mr-2"></i><span id="balance-number">0</span>
+     </div>
+     <div class="text-xs rank">
+      +1
+     </div>
+     <div class="text-sm flex items-center justify-center status">
+      <i class="fas fa-medal text-bronze-400 mr-1"></i>
+      Bronze
+     </div>
+    </div>
+    <div class="flex justify-center mb-4">
+     <img alt="Large coin image" class="w-56 h-56 coin" height="224" onclick="incrementBalance()" src="https://i.imgur.com/SJRidUB.png" width="224"/>
+    </div>
+   </div>
+   <div>
+    <div class="flex items-center justify-between mb-4">
+     <div class="text-yellow-400 text-sm" id="progress-value">
+      0
+     </div>
+     <div class="w-full progress-bar mx-2">
+      <div class="progress glow" id="progress-bar">
+      </div>
+     </div>
+    </div>
+    <div class="flex justify-around mt-8">
+     <div class="icon-container">
+      <i class="fas fa-coins text-2xl mb-1 icon"></i>
+      <div class="text-xs icon-label">
+       Earn
+      </div>
+     </div>
+     <div class="icon-container">
+      <i class="fas fa-arrow-up text-2xl mb-1 icon"></i>
+      <div class="text-xs icon-label">
+       Boosts
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="modal" id="modal">
+   <i class="fas fa-times text-white close-btn" onclick="toggleModal()"></i>
+   <h2 class="text-white text-lg font-bold mb-4">
+    Frens List
+   </h2>
+   <p class="text-white">
+    Here you can see your friends.
+   </p>
+  </div>
+  <div class="edit-modal" id="edit-modal">
+   <input type="text" id="new-profile-name" placeholder="Enter new profile name"/>
+   <button onclick="saveProfileName()">Save</button>
+  </div>
+ </body>
+</html>
