@@ -13,12 +13,13 @@
             margin: auto;
             overflow: hidden;
             height: 100vh;
+            position: relative;
         }
    .glow {
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         }
    .coin {
-            transition: transform 0.2s ease-in-out;
+            transition: transform 0.1s ease-in-out;
         }
    .coin:active {
             transform: scale(0.95);
@@ -32,6 +33,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: filter 0.3s ease-in-out;
         }
    .profile-img {
             border: 2px solid #4B5563;
@@ -107,17 +109,18 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(0);
             background: rgba(31, 41, 55, 0.95);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            display: none;
+            transition: transform 0.3s ease-in-out;
+            display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
    .edit-modal.active {
-            display: flex;
+            transform: translate(-50%, -50%) scale(1);
         }
    .edit-modal input {
             background: rgba(255, 255, 255, 0.1);
@@ -134,6 +137,41 @@
             border-radius: 5px;
             color: black;
             cursor: pointer;
+        }
+   .particle {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #FBBF24;
+            animation: floatUp 1s ease-in-out forwards;
+        }
+   @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+   .snowflake {
+            position: absolute;
+            top: -10px;
+            font-size: 1rem;
+            color: white;
+            opacity: 0.8;
+            animation: fall 5s linear infinite;
+        }
+   @keyframes fall {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+   .blurred {
+            filter: blur(5px);
         }
    @media (max-width: 768px) {
             .card {
@@ -164,6 +202,37 @@
                 progressBar.style.width = (currentProgress - 1) / 6000 * 100 + '%';
                 localStorage.setItem('progress', currentProgress - 1);
             }
+
+            createParticle();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.innerText = '+1';
+            document.body.appendChild(particle);
+
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            setTimeout(() => {
+                particle.remove();
+            }, 1000);
+        }
+
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.innerText = '❄';
+            document.body.appendChild(snowflake);
+
+            snowflake.style.left = `${Math.random() * window.innerWidth}px`;
+
+            setTimeout(() => {
+                snowflake.remove();
+            }, 5000);
         }
 
         function toggleModal() {
@@ -226,7 +295,9 @@
 
         function editProfileName() {
             const editModal = document.getElementById('edit-modal');
+            const card = document.querySelector('.card');
             editModal.classList.add('active');
+            card.classList.add('blurred');
         }
 
         function saveProfileName() {
@@ -236,7 +307,9 @@
                 localStorage.setItem('profileName', newName);
             }
             const editModal = document.getElementById('edit-modal');
+            const card = document.querySelector('.card');
             editModal.classList.remove('active');
+            card.classList.remove('blurred');
         }
 
         function editProfileImg() {
@@ -260,6 +333,7 @@
             loadValues();
             animateProgress();
             loadTelegramProfile();
+            setInterval(createSnowflake, 200);
         };
   </script>
  </head>
